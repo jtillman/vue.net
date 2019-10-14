@@ -1,5 +1,4 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Vue.Net.Javascript;
 
 namespace Vue.Net
@@ -7,7 +6,7 @@ namespace Vue.Net
     public class VueComponentConverter : JavascriptConverter<IVueComponent>
     {
         public override void WriteJavascript(
-            JavascriptTextWriter writer,
+            OldJavascriptTextWriter writer,
             IVueComponent value,
             JsonSerializer serializer)
         {

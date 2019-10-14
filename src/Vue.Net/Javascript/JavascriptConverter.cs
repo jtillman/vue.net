@@ -14,7 +14,7 @@ namespace Vue.Net.Javascript
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var jsWriter = writer as JavascriptTextWriter;
+            var jsWriter = writer as OldJavascriptTextWriter;
             if (null == jsWriter)
             {
                 throw new ArgumentException("Writer object must be a JavascriptWriter");
@@ -27,6 +27,6 @@ namespace Vue.Net.Javascript
             WriteJavascript(jsWriter, (T) value, serializer);
         }
 
-        public abstract void WriteJavascript(JavascriptTextWriter writer, T value, JsonSerializer serializer);
+        public abstract void WriteJavascript(OldJavascriptTextWriter writer, T value, JsonSerializer serializer);
     }
 }

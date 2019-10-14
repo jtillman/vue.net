@@ -2,6 +2,6 @@
 {
     public interface IJavascriptContent
     {
-        void WriterTo(JavascriptTextWriter writer);
+        void WriterTo(OldJavascriptTextWriter writer);
     }
 }

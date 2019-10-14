@@ -6,7 +6,7 @@ namespace Vue.Net
 {
     public class VueComputedConverter : JavascriptConverter<VueComputed>
     {
-        public override void WriteJavascript(JavascriptTextWriter writer, VueComputed value, JsonSerializer serializer)
+        public override void WriteJavascript(OldJavascriptTextWriter writer, VueComputed value, JsonSerializer serializer)
         {
             writer.WriteStartJsMember(value.Name);
             writer.WriteStartJsObject();

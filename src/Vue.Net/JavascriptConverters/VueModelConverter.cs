@@ -5,7 +5,7 @@ namespace Vue.Net
 {
     public class VueModelConverter : JavascriptConverter<VueModel>
     {
-        public override void WriteJavascript(JavascriptTextWriter writer, VueModel value, JsonSerializer serializer)
+        public override void WriteJavascript(OldJavascriptTextWriter writer, VueModel value, JsonSerializer serializer)
         {
 
             var modelType = value.GetType();

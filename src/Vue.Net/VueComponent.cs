@@ -9,7 +9,7 @@ namespace Vue.Net
         public IVueOptions Options { get; set; }
 
         public VueComponent(
-            string name, 
+            string name,
             IVueOptions options = null)
         {
             Name = name;

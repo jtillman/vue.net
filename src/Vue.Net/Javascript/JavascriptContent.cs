@@ -35,7 +35,7 @@ namespace Vue.Net.Javascript
 
         }
 
-        public void WriterTo(JavascriptTextWriter writer)
+        public void WriterTo(OldJavascriptTextWriter writer)
         {
             _options.Serializer.Serialize(writer, Instance);
         }

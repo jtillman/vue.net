@@ -5,7 +5,7 @@ namespace Vue.Net.Javascript
 {
     public class CSharpSyntaxConverter : JavascriptConverter<CompilationUnitSyntax>
     {
-        public override void WriteJavascript(JavascriptTextWriter writer, CompilationUnitSyntax value, JsonSerializer serializer)
+        public override void WriteJavascript(OldJavascriptTextWriter writer, CompilationUnitSyntax value, JsonSerializer serializer)
         {
             var syntaxWriter = new JavascriptSyntaxWriter(writer);
             {

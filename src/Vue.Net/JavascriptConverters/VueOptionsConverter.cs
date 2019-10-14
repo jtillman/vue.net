@@ -6,7 +6,7 @@ namespace Vue.Net
     public class VueOptionsConverter : JavascriptConverter<IVueOptions>
     {
         public override void WriteJavascript(
-            JavascriptTextWriter writer, 
+            OldJavascriptTextWriter writer, 
             IVueOptions value,
             JsonSerializer serializer)
         {

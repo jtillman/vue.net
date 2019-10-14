@@ -14,16 +14,15 @@ namespace Vue.Net.Javascript
 
         };
 
-        public JavascriptTextWriter Writer { get; }
+        public OldJavascriptTextWriter Writer { get; }
 
-        public JavascriptSyntaxWriter(JavascriptTextWriter writer)
+        public JavascriptSyntaxWriter(OldJavascriptTextWriter writer)
         {
             Writer = writer;
         }
 
         public override void VisitAccessorDeclaration(AccessorDeclarationSyntax node)
         {
-
             Writer.WriteStartJsFunctionDefinition();
             Writer.WriteStartJsFunctionSignature(node.Keyword.ValueText);
             switch (node.Kind())
@@ -104,8 +103,16 @@ namespace Vue.Net.Javascript
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            Writer.WriteStartJsMember(node.Identifier.ValueText);
+            Writer.WriteStartJsVariableStatement(node.Identifier.ValueText);
 
+            Writer.WriteStartJsFunctionDefinition();
+
+            Writer.WriteStartJsFunctionSignature("function");
+            Writer.WriteEndJsFunctionSignature();
+
+            Writer.WriteStartJsFunctionBlock();
+
+            Writer.WriteStartJsReturnStatement();
             Writer.WriteStartJsObject();
             foreach (var member in node.Members)
             {
@@ -113,19 +120,16 @@ namespace Vue.Net.Javascript
             }
             Writer.WriteEndJsObject();
 
-            Writer.WriteEndJsMember();
+            Writer.WriteEndJsStatement();
+            Writer.WriteEndJsFunctionBlock();
         }
 
         public override void VisitCompilationUnit(CompilationUnitSyntax node)
         {
-            Writer.WriteStartJsFunctionBlock();
-
             foreach (var member in node.Members)
             {
                 Visit(member);
             }
-
-            Writer.WriteEndJsFunctionBlock();
         }
 
         public override void VisitElseClause(ElseClauseSyntax node)
@@ -152,17 +156,7 @@ namespace Vue.Net.Javascript
 
         public override void VisitIdentifierName(IdentifierNameSyntax node)
         {
-            //var info = Model?.GetSymbolInfo(node);
-            var prefix = string.Empty;
-            //switch (info?.Symbol.Kind)
-            //{
-            //    case SymbolKind.Property:
-            //    case SymbolKind.Method:
-            //    case SymbolKind.Field:
-            //        prefix = "this.";
-            //        break;
-            //}
-            Writer.WriteJsRawValue($"{prefix}{node.Identifier.Text}");
+            Writer.WriteJsRawValue(node.Identifier.Text);
         }
 
         public override void VisitIfStatement(IfStatementSyntax node)

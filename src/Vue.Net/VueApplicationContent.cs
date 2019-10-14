@@ -22,7 +22,7 @@ namespace Vue.Net
             _components = components;
         }
 
-        public void WriterTo(JavascriptTextWriter writer)
+        public void WriterTo(OldJavascriptTextWriter writer)
         {
             // Opening an async closure to run script
             writer.WriteStartJsFunctionSignature(string.Empty);

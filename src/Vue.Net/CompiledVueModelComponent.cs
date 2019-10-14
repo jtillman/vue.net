@@ -8,9 +8,114 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Vue.Net.Javascript;
+using Vue.Net.Javascript.Syntax;
 
 namespace Vue.Net
 {
+    public class CSharpJsCompiler
+    {
+        public CSharpDecompiler Decompiler { get; }
+
+        public CSharpCompilation Compilation { get; }
+
+        public Dictionary<string, CSharpDecompiler> Decompilers { get; }
+            = new Dictionary<string, CSharpDecompiler>();
+
+        public Assembly ApplicationAssembly { get; }
+
+        public CSharpJsCompiler(Assembly applicationAssembly)
+        {
+            ApplicationAssembly = applicationAssembly;
+
+            Compilation = CSharpCompilation.Create("VueNet").AddReferences(
+                MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                MetadataReference.CreateFromFile(ApplicationAssembly.Location))
+                .AddReferences(ApplicationAssembly.GetReferencedAssemblies().Select(assembly => MetadataReference.CreateFromFile(Assembly.Load(assembly).Location)));
+        }
+
+        public CSharpDecompiler GetDecompilerForType<T>()
+        {
+            var location = typeof(T).Assembly.Location;
+            if (!Decompilers.TryGetValue(location, out var decompiler))
+            {
+                decompiler = new CSharpDecompiler(typeof(T).Assembly.Location, new DecompilerSettings()
+                {
+                    ThrowOnAssemblyResolveErrors = false
+                });
+                Decompilers[location] = decompiler;
+            }
+            return decompiler;
+        }
+
+        public JsSyntax GetJsDefinitionCompilation<T>()
+        {
+            var codeType = typeof(T);
+            var decompiler = GetDecompilerForType<T>();
+            var typeText = decompiler.DecompileTypeAsString(new FullTypeName(codeType.FullName));
+            var syntaxTree = CSharpSyntaxTree.ParseText(typeText);
+
+            var compilation = Compilation.AddSyntaxTrees(syntaxTree);
+
+            var types = syntaxTree.GetRoot().DescendantNodes()
+                .OfType<TypeSyntax>()
+                .Select(t => t.ToString()).ToArray();
+
+            var type = syntaxTree
+                .GetRoot()
+                .DescendantNodes()
+                .OfType<ClassDeclarationSyntax>()
+                .Where(cls => cls.Identifier.ValueText == codeType.Name)
+                .First();
+
+            var model = compilation.GetSemanticModel(syntaxTree);
+
+            var memberCalls = type.DescendantNodes()
+                .OfType<MemberAccessExpressionSyntax>().ToArray();
+
+            var d = new Dictionary<string, string>();
+            //var b = (string s) => new JsObjectCreationExpressionSyntax(new JsBaseObjectPropertySyntax[0]);
+
+
+            // Rewrite current
+            foreach (var call in memberCalls)
+            {
+                var symbolInfo = model.GetSymbolInfo(call);
+                var symbol = symbolInfo.Symbol;
+            }
+            var semanticModel = compilation.GetSemanticModel(syntaxTree, true);
+            var transpiler = new CSharpToJavascriptTranspiler(semanticModel);
+            return transpiler.ToJsObjectCreationExpression(type);
+        }
+    }
+
+    // Replace all calls to string.blah to something else
+
+    //public class JsTypeDefinition
+    //{
+    //    public Dictionary<string, JsSyntax> TypeMembers { get; }
+
+    //    public JsObjectPropertySyntax Length { get; }
+    //        = new JsMemberAccessorExpressionSyntax();
+
+    //    public int Length {
+    //        get
+    //        {
+    //            return (int)((dynamic)this).length;
+    //        }
+    //    }
+    //}
+
+    public class JsAnglesType
+    {
+        public void Write()
+        {
+            // TranspileProperty<string>(str=>str.Length, 
+            //   JsSyntax.Property("length")
+            // TranspilerMethod<method>
+            // Over
+        }
+    }
 
     public class CompiledVueModelComponent : IVueComponent 
     {

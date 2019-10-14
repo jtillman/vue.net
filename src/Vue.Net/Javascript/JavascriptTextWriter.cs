@@ -3,93 +3,195 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Vue.Net.Javascript
 {
-    public class JavascriptWriterState : IDisposable
+    public static class JsToken
     {
-        internal JavascriptTextWriter Writer { get; set; }
+        public static readonly string OpenCurlyBrace = "{";
+        public static readonly string CloseCurlyBrace = "}";
 
-        internal JavascriptWriterState ParentState { get; set; }
+        public static readonly string OpenBracket = "[";
+        public static readonly string CloseBracket = "]";
 
-        private int? _level;
-        public int Level
+        public static readonly string OpenParenthisis = "(";
+        public static readonly string CloseParenthisis = ")";
+    }
+
+    public enum JavascriptState
+    {
+        Document,
+        Object,
+        ObjectProperty,
+        MethodSignature,
+        MethodBody,
+        Statement
+    }
+
+    public class JavascriptTextWriter : JsonTextWriter
+    {
+        private readonly TextWriter _writer;
+
+        public JavascriptFormattingOptions FormattingOptions { get; }
+
+        internal readonly Stack<JavascriptState> _openStates = new Stack<JavascriptState>();
+
+        internal JavascriptState State => _openStates.Peek();
+
+        private bool _isFirstValue = true;
+
+        public JavascriptTextWriter(
+            TextWriter textWriter,
+            JavascriptFormattingOptions formattingOptions = null) : base(textWriter)
         {
-            get
-            {
-                if (!_level.HasValue)
-                {
-                    _level = (ParentState?.Level ?? 0) + (PaddingEnabled && !IsClosed ? 1 : 0);
-                }
-                return _level.Value;
-            }
+            _writer = textWriter ?? throw new ArgumentNullException(nameof(textWriter));
+            FormattingOptions = formattingOptions ?? JavascriptFormattingOptions.Default;
+            PushState(JavascriptState.Document);
+        }
+
+        public void WriteJsValue(int value)
+        {
+            AdvanceStateValue();
+            _writer.Write(value);
+        }
+
+        internal void PushState(JavascriptState state)
+        {
+            _openStates.Push(state);
+            _isFirstValue = true;
         }
         
-        public string DelimiterText { get; }
-
-        public string PaddingText => PaddingEnabled ? null : string.Empty.PadRight(Level * 2, '-');
-
-        public bool PaddingEnabled => DelimiterText == "\r\n";
-
-        public string ClosingText { get; }
-
-        public string EntryText { get; }
-
-        public bool WaitingOne { get; private set; }
-
-        public bool IsClosed { get; private set; }
-
-        public JavascriptWriterState(string closingText, string delimiterText, string entryText)
+        internal void PopState()
         {
-            EntryText = entryText;
-            DelimiterText = delimiterText;
-            ClosingText = closingText;
-            WaitingOne = ParentState?.IsClosed ?? true;
+            _openStates.Pop();
+            _isFirstValue = false;
         }
 
-        public void Write(string text)
+        internal void AdvanceStateValue()
         {
-            Writer.WriteJs(text);
-        }
-
-        internal void WriteStartNewEntry(bool writeDelimiter)
-        {
-            if (writeDelimiter && null != DelimiterText)
+            if (_isFirstValue)
             {
-                Writer.WriteLine();
+                _isFirstValue = false;
+                return;
             }
-            if (null != EntryText)
+
+            switch (State)
             {
-                Write(EntryText);
+                case JavascriptState.Document:
+                    _writer.Write(FormattingOptions.NewLineString);
+                    break;
+                case JavascriptState.Object:
+                case JavascriptState.ObjectProperty:
+                    _writer.Write(",");
+                    _writer.Write(FormattingOptions.NewLineString);
+                    break;
+                case JavascriptState.MethodSignature:
+                    _writer.Write(", ");
+                    break;
+                case JavascriptState.MethodBody:
+                    _writer.Write(FormattingOptions.NewLineString);
+                    break;
+                default:
+                    throw new InvalidOperationException();
             }
         }
-        public void WriteStartEntry()
-        {
-            WriteStartNewEntry(!WaitingOne);
-            WaitingOne = false;
+
+        public void WriteStartJsObject(){
+            AdvanceStateValue();
+            _writer.Write("{");
+            PushState(JavascriptState.Object);
         }
 
-        public void Close()
-        {
-            if (!IsClosed && null != ClosingText)
+        public void WriteEndJsObject() {
+            switch (State)
             {
-                WriteStartNewEntry(false);
-                Write(ClosingText);
-                Writer.States.Remove(this);
+                case JavascriptState.Object:
+                    break;
+                case JavascriptState.ObjectProperty:
+                    break;
+                case JavascriptState.MethodSignature:
+                    break;
+                default:
+                    throw new InvalidOperationException();
             }
-            IsClosed = true;
+            _writer.Write("}");
         }
 
-        public void Dispose()
+        public void WriteStartJsObjectProperty(string propertyName) {
+
+            switch (State)
+            {
+                case JavascriptState.Object:
+                    break;
+                case JavascriptState.ObjectProperty:
+                    if (_isFirstValue)
+                    {
+                        throw new InvalidOperationException("Expected Property Value");
+                    }
+                    break;
+                default:
+                    throw new InvalidOperationException();
+            }
+
+            AdvanceStateValue();
+            _writer.Write(propertyName);
+            _writer.Write(": ");
+
+            PushState(JavascriptState.ObjectProperty);
+        }
+
+        public void WriteStartJsMethodDefinition(string methodName)
         {
-            Close();
+            AdvanceStateValue();
+            _writer.Write(methodName);
+            _writer.Write("(");
+            PushState(JavascriptState.MethodSignature);
+        }
+
+        public void WriteEndJsMethodDefinition() {
+            switch (State)
+            {
+                case JavascriptState.MethodSignature:
+                    _writer.Write(") {}");
+                    break;
+                case JavascriptState.MethodBody:
+                    _writer.Write("}");
+                    break;
+                default:
+                    throw new InvalidOperationException();
+            }
+            PopState();
+        }
+
+        public void WriteJsMethodArgument(string argumentName)
+        {
+            if (State != JavascriptState.MethodSignature)
+            {
+                throw new InvalidOperationException();
+            }
+
+            AdvanceStateValue();
+            _writer.Write(argumentName);
+        }
+
+        internal void WriteStartStatement()
+        {
+        }
+        public void WriteStartVariableDeclarationStatement(string variableName)
+        {
+            WriteStartStatement();
+            _writer.Write(variableName);
+            _writer.Write(" = ");
+        }
+
+        public void WriteEndStatement()
+        {
+
         }
     }
+
     public class Clause
     {
-        public string Id { get; set; }
-
         public string[] Modifiers { get; set; }
 
         public string Identifier { get; set; }
@@ -103,7 +205,41 @@ namespace Vue.Net.Javascript
         public int ValueIndex { get; set; }
     }
 
-    public class JavascriptTextWriter : JsonTextWriter
+    public class JavascriptFormattingOptions
+    {
+        public static JavascriptFormattingOptions Default =
+            new JavascriptFormattingOptions();
+
+        public string NewLineString { get; }
+        public char PaddingCharcter { get; }
+        public string CurlyBracePostDelimiter { get; }
+        public string BracketPostDelimiter { get; }
+        public string ParenthisisPostDelmiter { get; }
+
+        public JavascriptFormattingOptions(
+            string newLineString = "\r\n",
+            char paddingCharacter = ' ',
+            string curlyBracePostDelimiter = "\r\n",
+            string bracketPostDelimiter = " ",
+            string parenthisisPostDelimiter = " "
+            )
+        {
+            NewLineString = newLineString;
+            PaddingCharcter = paddingCharacter;
+            CurlyBracePostDelimiter = curlyBracePostDelimiter;
+            BracketPostDelimiter = bracketPostDelimiter;
+            ParenthisisPostDelmiter = parenthisisPostDelimiter;
+        }
+    }
+
+    public enum JavascriptEnclosureType
+    {
+        CurlyBrace,
+        Parenthesis,
+        Bracket
+    }
+
+    public class OldJavascriptTextWriter : JsonTextWriter
     {
         public const string AsyncModifier = "async ";
         public const string Comma = ",";
@@ -116,17 +252,17 @@ namespace Vue.Net.Javascript
 
         private readonly TextWriter _writer;
 
-        public JavascriptWriterState State => States.Count > 0 ? States[States.Count - 1] : null;
-
-        internal IList<JavascriptWriterState> States
-            = new List<JavascriptWriterState>();
+        private JavascriptFormattingOptions FormattingOptions { get; }
 
         internal Stack<Clause> OpenClauses = new Stack<Clause>();
 
-        public JavascriptTextWriter(
-            TextWriter writer) : base(writer)
+        public OldJavascriptTextWriter(
+            TextWriter writer,
+            JavascriptFormattingOptions formattingOptions = null
+            ) : base(writer)
         {
-            _writer = writer;
+            _writer = writer ?? throw new ArgumentNullException(nameof(writer));
+            FormattingOptions = formattingOptions ?? JavascriptFormattingOptions.Default;
         }
 
         public void WriteStartJsValue()
@@ -145,8 +281,6 @@ namespace Vue.Net.Javascript
             }
 
             clause.ValueIndex++;
-
-            clause.Id = Guid.NewGuid().ToString();
         }
 
         public void WriteStartJsClause(char clauseHeader, string identifier = null, string[] modifiers = null, bool vertical = false)
@@ -163,9 +297,14 @@ namespace Vue.Net.Javascript
 
         public void WriteStartJsClause(Clause clause)
         {
+
+            if (clause == null)
+            {
+                throw new ArgumentNullException(nameof(clause));
+            }
+
             WriteStartJsValue();
 
-            clause.Id = Guid.NewGuid().ToString();
             if (null != clause.Modifiers)
             {
                 foreach (var modifier in clause.Modifiers)
@@ -195,6 +334,7 @@ namespace Vue.Net.Javascript
             {
                 throw new NotSupportedException($"Can't close clause because we expected {expectedStartingToken} and found {lastClause.StartingToken}");
             }
+
             OpenClauses.Pop();
 
             if (endingToken.HasValue)
@@ -333,165 +473,5 @@ namespace Vue.Net.Javascript
         public void WriteOpenBracket() => _writer.Write(OpenBracket);
         public void WriteOpenCurlyBrace() => _writer.Write(OpenCurlyBrace);
         public void WriteOpenParenthesis() => _writer.Write(OpenParenthesis);
-
-        public override void Close()
-        {
-            States
-                .Reverse()
-                .Where(state => !state.IsClosed)
-                .ToList()
-                .ForEach(state => state.Close());
-            base.Close();
-        }
-    }
-
-    public class OldJavascriptTextWriter : StringWriter
-    {
-        public const char StartCurlyBraceToken = '{';
-        public const char EndCurlyBraceToken = '}';
-        public const char StartBracketToken = '[';
-        public const char EndBracketToken = ']';
-        public const char SemicolonToken = ';';
-        public const char ColonToken = ':';
-        public const string IfToken = "if";
-        public const char CommaToken = ',';
-        public const char StartParenthesisToken = '(';
-        public const char EndParenthesisToken = ')';
-        public const string ElseConditionToken = "else ";
-        public const string VariableDeclarationToken = "var";
-        public const string SpaceToken = " ";
-        public const char EqualSignToken = '=';
-        public const string NewToken = "new";
-        public const string ReturnToken = "return";
-        public const string NullToken = "null";
-        public const char PeriodToken = '.';
-        public const string ThisToken = "this";
-        public const string AsyncToken = "async";
-        public const string AwaitToken = "await";
-
-        public static char[] StartingStatementCharacters = new char[] { StartCurlyBraceToken, StartParenthesisToken, EqualSignToken, StartBracketToken, SemicolonToken };
-
-        public OldJavascriptTextWriter(): base() { }
-
-        public Task WriteStartObjectAsync() => WriteAsync(StartCurlyBraceToken);
-        public Task WriteEndObjectAsync() => WriteAsync(EndCurlyBraceToken);
-        public Task WriteStartInvocationAsync() => WriteAsync(StartParenthesisToken);
-
-        public Task WriteStartAsyncInvocationAsync(string name) => WriteStartInvocationAsync(name, AsyncToken);
-
-        public Task WriteStartAwaitInvocationAsync(string name) => WriteStartInvocationAsync(name, AwaitToken);
-
-        public async Task WriteStartInvocationAsync(string name, params string[] modifiers)
-        {
-            await WriteCommaIfRequired();
-
-            foreach (var modifier in modifiers)
-            {
-                await WriteAsync(modifier);
-                await WriteSpaceAsync();
-            }
-
-            await WriteAsync(name);
-            await WriteStartInvocationAsync();
-        }
-
-        public Task WriteEndInvocationAsync() => WriteAsync(EndParenthesisToken);
-        public Task WriteCommaAsync() => WriteAsync(CommaToken);
-        public Task WriteSpaceAsync() => WriteAsync(SpaceToken);
-        public Task WriteVarAsync() => WriteAsync(VariableDeclarationToken);
-        public Task WriteEqualSignAsync() => WriteAsync(EqualSignToken);
-        public Task WriteReturnAsync() => WriteAsync(ReturnToken);
-        public Task WriteNullAsync() => WriteAsync(NullToken);
-        public Task WriteNewAsync() => WriteAsync(NewToken);
-        public Task WriteThisAsync() => WriteAsync(ThisToken);
-        public Task WritePeriodAsync() => WriteAsync(PeriodToken);
-        public Task WriteSemicolonAsync() => WriteAsync(SemicolonToken);
-        public Task WriteColonAsync() => WriteAsync(ColonToken);
-        public Task WriteStartBracketAsync() => WriteAsync(StartBracketToken);
-        public Task WriteEndBracketAsync() => WriteAsync(EndBracketToken);
-
-        public async Task WriteStartIfConditionAsync() {
-            await WriteAsync(IfToken);
-            await WriteStartInvocationAsync();
-        }
-        public Task WriteEndIfConditionAsync() => WriteAsync(EndParenthesisToken);
-        public Task WriteElseConditionAsync() => WriteAsync(ElseConditionToken);
-        public Task WriteEndMethodSignatureAsync() => WriteEndObjectAsync();
-
-        public async Task WriteStartVariableDeclartionAsync(string name)
-        {
-            await WriteVarAsync();
-            await WriteSpaceAsync();
-            await WriteAsync(name);
-            await WriteEqualSignAsync();
-        }
-
-        public Task WriteEndVariableDeclartionAsync() => WriteSemicolonAsync();
-
-        public Task WriteStartConstructorAsync(string typeName) => WriteStartInvocationAsync(typeName, NewToken);
-
-        public Task WriteEndConstructorAsync() => WriteEndInvocationAsync();
-
-        public async Task WriteStartIndexerAsync(string name)
-        {
-            await WriteAsync(name);
-            await WriteStartBracketAsync();
-        }
-
-        public Task WriteEndIndexerAsync() => WriteEndBracketAsync();
-
-        public async Task WriteIndexerAsync(string name, object index)
-        {
-            await WriteStartIndexerAsync(name);
-            await WriteRawValueAsync(index);
-            await WriteEndIndexerAsync();
-        }
-
-        public Task WriteValueAsync(string value) => WriteAsync(value);
-
-        public Task WriteRawValueAsync(object value) => WriteValueAsync(JsonConvert.SerializeObject(value));
-
-        public async Task WriteParameterNameAsync(string name)
-        {
-            await WriteCommaIfRequired();
-            await WriteAsync(name);
-        }
-
-        public async Task WritePropertyNameAsync(string name)
-        {
-            await WriteParameterNameAsync(name);
-            await WriteColonAsync();
-            await WriteSpaceAsync();
-        }
-
-        public async Task WriteParameterValueAsync(string value)
-        {
-            await WriteCommaIfRequired();
-            await WriteValueAsync(value);
-        }
-
-        public async Task WriteParameterRawValueAsync(object value)
-        {
-            await WriteCommaIfRequired();
-            await WriteRawValueAsync(value);
-        }
-
-        public async Task WriteCommaIfRequired()
-        {
-            var sb = GetStringBuilder();
-            var pointer = sb.Length - 1;
-            while(pointer >= 0){
-                var character = sb[pointer];
-                if (!char.IsWhiteSpace(character))
-                {
-                    if (!StartingStatementCharacters.Contains(character))
-                    {
-                        await WriteCommaAsync();
-                    }
-                    return;
-                }
-                pointer--;
-            }
-        }
     }
 }

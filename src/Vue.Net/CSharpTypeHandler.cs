@@ -15,7 +15,6 @@ namespace Vue.Net
         public Dictionary<string, Func<SyntaxNode, SyntaxNode>> Overrides { get; }
             = new Dictionary<string, Func<SyntaxNode, SyntaxNode>>();
 
-
         public CSharpTypeHandler()
         {
             // AliasMethodCall<HttpClient>(c => new HttpClient(), "axios.create");

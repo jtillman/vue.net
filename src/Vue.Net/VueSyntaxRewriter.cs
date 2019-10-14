@@ -3,9 +3,28 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using Vue.Net.Javascript.Syntax;
 
 namespace Vue.Net
 {
+
+    // Static Member
+    // Instance Member
+    // Expression -> JsExpression
+
+    public class JsRenderer
+    {
+/*        public bool CanHandleSymbol(ISymbol symbol)
+        {
+            switch(symbol.)
+            return true;
+        }
+
+        public JsExpressionSyntax RenderSymbol(ISymbol symbol)
+        {
+
+        } */
+    }
     public class VueSyntaxRewriter : CSharpSyntaxRewriter
     {
         private readonly SemanticModel _semanticModel;
@@ -21,11 +40,10 @@ namespace Vue.Net
         public override SyntaxNode VisitIdentifierName(IdentifierNameSyntax node)
         {
             var retVal = base.VisitIdentifierName(node);
-
             var info = this._semanticModel.GetSymbolInfo(node);
-            if (info.Symbol is IPropertySymbol prop)
+            if (info.Symbol is IPropertySymbol)
             {
-                
+                var containingType = info.Symbol.ContainingType;
                 var newExpression = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression,
                             SyntaxFactory.ThisExpression(),
                             SyntaxFactory.IdentifierName(node.Identifier.Text));
@@ -42,6 +60,7 @@ namespace Vue.Net
             SyntaxNode rewrittenNode = base.VisitInvocationExpression(node);
             if (node.Expression.IsKind(SyntaxKind.SimpleMemberAccessExpression))
             {
+                var containingType = invokedSymbol.ContainingType;
                 var nameFormat =
                     new SymbolDisplayFormat(
                         SymbolDisplayGlobalNamespaceStyle.Omitted,

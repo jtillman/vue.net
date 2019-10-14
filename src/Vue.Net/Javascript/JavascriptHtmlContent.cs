@@ -14,7 +14,7 @@ namespace Vue.Net.Javascript
         }
         public void WriteTo(TextWriter writer, HtmlEncoder encoder)
         {
-            var jsWriter = new JavascriptTextWriter(writer);
+            var jsWriter = new OldJavascriptTextWriter(writer);
             foreach(var jsContent in ScriptContents)
             {
                 jsContent.WriterTo(jsWriter);
