@@ -1,0 +1,6 @@
+{
+  "msbuild-sdks": {
+    "Microsft.Build.Traversal": "2.0.52"
+  }
+}
+

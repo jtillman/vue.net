@@ -30,7 +30,7 @@ namespace Vue.Net
 
             Compilation = CSharpCompilation.Create("VueNet").AddReferences(
                 MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-                MetadataReference.CreateFromFile(ApplicationAssembly.Location))
+                MetadataReference.CreateFromFile(path: ApplicationAssembly.Location))
                 .AddReferences(ApplicationAssembly.GetReferencedAssemblies().Select(assembly => MetadataReference.CreateFromFile(Assembly.Load(assembly).Location)));
         }
 
@@ -57,10 +57,6 @@ namespace Vue.Net
 
             var compilation = Compilation.AddSyntaxTrees(syntaxTree);
 
-            var types = syntaxTree.GetRoot().DescendantNodes()
-                .OfType<TypeSyntax>()
-                .Select(t => t.ToString()).ToArray();
-
             var type = syntaxTree
                 .GetRoot()
                 .DescendantNodes()
@@ -86,34 +82,6 @@ namespace Vue.Net
             var semanticModel = compilation.GetSemanticModel(syntaxTree, true);
             var transpiler = new CSharpToJavascriptTranspiler(semanticModel);
             return transpiler.ToJsObjectCreationExpression(type);
-        }
-    }
-
-    // Replace all calls to string.blah to something else
-
-    //public class JsTypeDefinition
-    //{
-    //    public Dictionary<string, JsSyntax> TypeMembers { get; }
-
-    //    public JsObjectPropertySyntax Length { get; }
-    //        = new JsMemberAccessorExpressionSyntax();
-
-    //    public int Length {
-    //        get
-    //        {
-    //            return (int)((dynamic)this).length;
-    //        }
-    //    }
-    //}
-
-    public class JsAnglesType
-    {
-        public void Write()
-        {
-            // TranspileProperty<string>(str=>str.Length, 
-            //   JsSyntax.Property("length")
-            // TranspilerMethod<method>
-            // Over
         }
     }
 

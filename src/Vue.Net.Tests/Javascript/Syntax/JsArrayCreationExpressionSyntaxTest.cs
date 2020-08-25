@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Vue.Net.Tests.Javascript.Syntax
 {
-    public class JsArrayCreationExpressionSyntaxTest : BaseJsSyntaxTest
+    public class JsArrayCreationExpressionSyntaxTest
     {
         [Fact]
         public void TestConstructorSetsValues()
@@ -11,7 +11,7 @@ namespace Vue.Net.Tests.Javascript.Syntax
             var values = new JsExpressionSyntax[0];
             var syntax = new JsArrayCreationExpressionSyntax(values);
 
-            Assert.Equal(values, syntax.Values);
+            Assert.Equal(values, syntax.Values.Arguments.Items);
         }
 
         [Fact]
@@ -20,7 +20,7 @@ namespace Vue.Net.Tests.Javascript.Syntax
             var values = new JsExpressionSyntax[0];
             var syntax = new JsArrayCreationExpressionSyntax(values);
 
-            AssertWrites("[]", syntax);
+            syntax.AssertWrites("[]");
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace Vue.Net.Tests.Javascript.Syntax
 
             var syntax = new JsArrayCreationExpressionSyntax(values);
 
-            AssertWrites("[firstValue]", syntax);
+            syntax.AssertWrites("[firstValue]");
         }
 
         [Fact]
@@ -48,7 +48,7 @@ namespace Vue.Net.Tests.Javascript.Syntax
 
             var syntax = new JsArrayCreationExpressionSyntax(values);
 
-            AssertWrites("[firstValue, secondValue, thirdValue]", syntax);
+            syntax.AssertWrites("[firstValue, secondValue, thirdValue]");
         }
     }
 }

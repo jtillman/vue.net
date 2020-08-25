@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Vue.Net.Javascript;
 
 namespace Vue.Net
@@ -24,6 +25,8 @@ namespace Vue.Net
 
         public void WriterTo(OldJavascriptTextWriter writer)
         {
+            if (null == writer) throw new ArgumentNullException(nameof(writer));
+
             // Opening an async closure to run script
             writer.WriteStartJsFunctionSignature(string.Empty);
             writer.WriteStartJsFunctionDefinition();

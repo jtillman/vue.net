@@ -18,6 +18,9 @@ namespace Vue.Net
         public CSharpTypeHandler()
         {
             // AliasMethodCall<HttpClient>(c => new HttpClient(), "axios.create");
+            // Action<MethodInfo> d = new Action<MethodInfo>((method) => { });
+            // d(typeof(string).GetMethod(nameof(string.ToString), Array.Empty<Type>()));
+            // AliasMethodCall<string>(s => s.ToString(), "");
             AliasMethodCall<object>(o => o.ToString(), "toString");
             AliasMethodCall<ICollection<string>>(f => f.Add(default), "push");
             AliasMethodCall<HttpClient>(c => c.GetStringAsync(string.Empty), "get");

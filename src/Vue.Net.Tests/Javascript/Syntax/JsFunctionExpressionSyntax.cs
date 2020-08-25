@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Vue.Net.Tests.Javascript.Syntax
 {
-    public class JsFunctionExpressionSyntaxTest : BaseJsSyntaxTest
+    public class JsFunctionExpressionSyntaxTest
     {
         [Fact]
         public void TestConstructorSetsPropertiesCorrectly()
@@ -25,7 +25,7 @@ namespace Vue.Net.Tests.Javascript.Syntax
 
             var syntax = new JsFunctionExpressionSyntax(arguments, body);
 
-            AssertWrites("function ()\r\n{}", syntax);
+            syntax.AssertWrites("function ()\r\n{}");
         }
 
         [Fact]
@@ -40,7 +40,7 @@ namespace Vue.Net.Tests.Javascript.Syntax
 
             var syntax = new JsFunctionExpressionSyntax(arguments, body);
 
-            AssertWrites("function (arg1)\r\n{}", syntax);
+            syntax.AssertWrites("function (arg1)\r\n{}");
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace Vue.Net.Tests.Javascript.Syntax
 
             var syntax = new JsFunctionExpressionSyntax(arguments, body);
 
-            AssertWrites("function (arg1, arg2, arg3)\r\n{}", syntax);
+            syntax.AssertWrites("function (arg1, arg2, arg3)\r\n{}");
         }
     }
 }

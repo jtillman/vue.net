@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Vue.Net.Tests.Javascript.Syntax
 {
-    public class JsIfStatementSyntaxTest : BaseJsSyntaxTest
+    public class JsIfStatementSyntaxTest
     {
         [Fact]
         public void TestConstructorSetsProperties()
@@ -34,7 +34,7 @@ namespace Vue.Net.Tests.Javascript.Syntax
 
             var syntax = new JsIfStatementSyntax(condition, statement, null);
 
-            AssertWrites("if (condition)\r\ntrueStatement;", syntax);
+            syntax.AssertWrites("if (condition)\r\ntrueStatement;");
         }
     }
 }

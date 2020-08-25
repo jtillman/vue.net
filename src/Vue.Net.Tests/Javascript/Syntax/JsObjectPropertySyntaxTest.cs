@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Vue.Net.Tests.Javascript.Syntax
 {
-    public class JsObjectPropertySyntaxTest : BaseJsSyntaxTest
+    public class JsObjectPropertySyntaxTest
     {
         [Fact]
         public void TestConstructorSetsProperties()
@@ -27,7 +27,7 @@ namespace Vue.Net.Tests.Javascript.Syntax
 
             var syntax = new JsObjectPropertySyntax(identifier, value);
 
-            AssertWrites("prop1: null", syntax);
+            syntax.AssertWrites("prop1: null");
         }
     }
 }

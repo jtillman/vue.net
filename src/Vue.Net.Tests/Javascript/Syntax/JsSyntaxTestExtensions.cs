@@ -4,9 +4,9 @@ using Xunit;
 
 namespace Vue.Net.Tests.Javascript.Syntax
 {
-    public class BaseJsSyntaxTest
+    public static class JsSyntaxTestExtensions
     {
-        protected void AssertWrites(string expected, JsSyntax syntax)
+        public static void AssertWrites(this JsSyntax syntax, string expected)
         {
             using (var stringWriter = new StringWriter())
             {

@@ -13,9 +13,7 @@ namespace Vue.Net.Javascript.Syntax
 
         public override void WriteTo(TextWriter textWriter)
         {
-            JsSyntaxToken.OpenParen.WriteTo(textWriter);
-            Expression.WriteTo(textWriter);
-            JsSyntaxToken.CloseBracket.WriteTo(textWriter);
+            textWriter.WriteJsSyntax(JsSyntaxToken.OpenParen, Expression, JsSyntaxToken.CloseParen);
         }
     }
 }

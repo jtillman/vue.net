@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Vue.Net.Tests.Javascript.Syntax
 {
-    public class JsLiteralExpressionSytaxText : BaseJsSyntaxTest
+    public class JsLiteralExpressionSytaxText
     {
         [Fact]
         public void TestConstructorSetsValue()
@@ -22,7 +22,7 @@ namespace Vue.Net.Tests.Javascript.Syntax
             var token = JsSyntaxToken.StringLiteral(value);
             var syntax = new JsLiteralExpressionSyntax(token);
 
-            AssertWrites(expected, syntax);
+            syntax.AssertWrites(expected);
         }
     }
 }

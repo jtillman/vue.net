@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Vue.Net.Tests.Javascript.Syntax
 {
-    public class JsMemberAccessorExpressionSyntaxTest : BaseJsSyntaxTest
+    public class JsMemberAccessorExpressionSyntaxTest
     {
 
         [Fact]
@@ -33,7 +33,7 @@ namespace Vue.Net.Tests.Javascript.Syntax
                 expression,
                 name);
 
-            AssertWrites("obj.field", syntax);
+            syntax.AssertWrites("obj.field");
         }
     }
 }

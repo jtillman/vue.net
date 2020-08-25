@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using Microsoft.AspNetCore.Mvc.Razor.Extensions;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Vue.Net.Javascript;
 using Vue.Net.Javascript.Syntax;
@@ -10,6 +11,7 @@ namespace Vue.Net.Tests.Javascript.Syntax
     {
         public static string Get { get; }
     }
+
     public class TestExtraTestClass
     {
         public int test = 3;
@@ -31,7 +33,12 @@ namespace Vue.Net.Tests.Javascript.Syntax
         }
     }
 
-    public class JsBlockSyntaxTest : BaseJsSyntaxTest
+    public class TodoManager
+    {
+        public TodoManager() { }
+    }
+
+    public class JsBlockSyntaxTest
     {
         [Fact]
         public void TestConstructorSetsStatements()
@@ -39,7 +46,7 @@ namespace Vue.Net.Tests.Javascript.Syntax
             var statements = new JsStatementSyntax[0];
             var syntax = new JsBlockSyntax(statements);
 
-            Assert.Equal(statements, syntax.Statements);
+            Assert.Equal(statements, syntax.Statements.Items);
         }
 
         [Fact]
@@ -48,7 +55,7 @@ namespace Vue.Net.Tests.Javascript.Syntax
             var statements = new JsStatementSyntax[0];
             var syntax = new JsBlockSyntax(statements);
 
-            AssertWrites("{}", syntax);
+            syntax.AssertWrites("{}");
         }
 
         [Fact]
@@ -60,7 +67,7 @@ namespace Vue.Net.Tests.Javascript.Syntax
             };
             var syntax = new JsBlockSyntax(statements);
 
-            AssertWrites("{null;}", syntax);
+            syntax.AssertWrites("{null;}");
         }
 
         [Fact]
@@ -79,16 +86,23 @@ namespace Vue.Net.Tests.Javascript.Syntax
             };
             var syntax = new JsBlockSyntax(statements);
 
-            AssertWrites("{null;null;null;}", syntax);
+            syntax.AssertWrites("{null;null;null;}");
         }
 
          
         [Fact]
         public void TestExtra()
         {
-            var package = new JavascriptPackage("myapplication");
-            package.AddType<HttpClient>();
-            package.AddType<TestExtraTestClass>();
+            var package = new JavascriptPackage();
+            var env = new CSharpToJsTranspilerEnvironment("myapp");
+            var jsType = env.TranspileType(typeof(TestExtraTestClass));
+            //package.AddType<HttpClient>();
+            //package.AddType<TestExtraTestClass>();
+
         }
+    }
+
+    public class JsCSharpInterpreter
+    {
     }
 }

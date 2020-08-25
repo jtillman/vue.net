@@ -5,25 +5,30 @@ namespace Vue.Net.Javascript.Syntax
 
     public sealed class JsAssignmentExpressionSyntax : JsExpressionSyntax
     {
+        public JsSyntaxToken OperatorToken { get; }
+
         public JsExpressionSyntax Left { get; }
 
         public JsExpressionSyntax Right { get; }
 
         public JsAssignmentExpressionSyntax(
+            JsSyntaxToken operatorToken,
             JsExpressionSyntax left,
             JsExpressionSyntax right)
         {
+            OperatorToken = operatorToken;
             Left = left;
             Right = right;
         }
 
         public override void WriteTo(TextWriter textWriter)
         {
-            Left.WriteTo(textWriter);
-            JsSyntaxToken.Space.WriteTo(textWriter);
-            JsSyntaxToken.EqualSign.WriteTo(textWriter);
-            JsSyntaxToken.Space.WriteTo(textWriter);
-            Right.WriteTo(textWriter);
+            textWriter.WriteJsSyntax(
+                Left,
+                JsSyntaxToken.Space,
+                OperatorToken,
+                JsSyntaxToken.Space,
+                Right);
         }
     }
 }

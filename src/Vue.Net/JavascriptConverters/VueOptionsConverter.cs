@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 using Vue.Net.Javascript;
 
 namespace Vue.Net
@@ -10,6 +11,10 @@ namespace Vue.Net
             IVueOptions value,
             JsonSerializer serializer)
         {
+            if (null == writer) throw new ArgumentNullException(nameof(writer));
+            if (null == value) throw new ArgumentNullException(nameof(value));
+            if (null == serializer) throw new ArgumentNullException(nameof(serializer));
+
             writer.WriteStartJsObject();
 
             if (null != value.El)

@@ -18,45 +18,6 @@ namespace Vue.Net.Javascript.Syntax
             Statement.WriteTo(textWriter);
         }
     }
-
-    public class JsThrowStatementSyntax : JsStatementSyntax
-    {
-        public JsExpressionSyntax Expression { get; }
-        public JsThrowStatementSyntax(
-            JsExpressionSyntax expression)
-        {
-            Expression = expression;
-        }
-
-        public override void WriteTo(TextWriter textWriter)
-        {
-            JsSyntaxToken.Throw.WriteTo(textWriter);
-            JsSyntaxToken.Space.WriteTo(textWriter);
-            Expression.WriteTo(textWriter);
-            JsSyntaxToken.Semicolon.WriteTo(textWriter);
-        }
-    }
-
-    public sealed class JsReturnStatementSyntax : JsStatementSyntax
-    {
-        public JsExpressionSyntax Expression { get; }
-
-        public JsReturnStatementSyntax(JsExpressionSyntax expression)
-        {
-            Expression = expression;
-        }
-
-        public override void WriteTo(TextWriter textWriter)
-        {
-            JsSyntaxToken.Return.WriteTo(textWriter);
-            if (null != Expression)
-            {
-                JsSyntaxToken.Space.WriteTo(textWriter);
-                Expression.WriteTo(textWriter);
-            }
-            JsSyntaxToken.Semicolon.WriteTo(textWriter);
-        }
-    }
     public sealed class JsObjectConstructionExpressionSyntax : JsExpressionSyntax
     {
 

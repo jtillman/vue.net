@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Vue.Net.Tests.Javascript.Syntax
 {
-    public class JsVariableDeclarationStatementSyntaxTest : BaseJsSyntaxTest
+    public class JsVariableDeclarationStatementSyntaxTest
     {
         [Fact]
         public void TestConstructorSetsProperties()
@@ -24,7 +24,7 @@ namespace Vue.Net.Tests.Javascript.Syntax
 
             var syntax = new JsVariableDeclarationStatementSyntax(name, null);
 
-            AssertWrites("var x;", syntax);
+            syntax.AssertWrites("var x;");
         }
 
         [Fact]
@@ -35,7 +35,7 @@ namespace Vue.Net.Tests.Javascript.Syntax
 
             var syntax = new JsVariableDeclarationStatementSyntax(name, initializer);
 
-            AssertWrites("var x = null;", syntax);
+            syntax.AssertWrites("var x = null;");
         }
     }
 }

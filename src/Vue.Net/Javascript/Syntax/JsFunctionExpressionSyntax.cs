@@ -19,22 +19,22 @@ namespace Vue.Net.Javascript.Syntax
 
         public override void WriteTo(TextWriter textWriter)
         {
-            JsSyntaxToken.Function.WriteTo(textWriter);
-            JsSyntaxToken.Space.WriteTo(textWriter);
-            JsSyntaxToken.OpenParen.WriteTo(textWriter);
+            textWriter.WriteJsSyntax(
+                JsSyntaxToken.Function,
+                JsSyntaxToken.Space,
+                JsSyntaxToken.OpenParen);
 
-            for (int i = 0; i < ArgumentNames.Length; i++)
+            for (int i = 0; i < ArgumentNames?.Length; i++)
             {
                 if (i > 0)
                 {
-                    JsSyntaxToken.Comma.WriteTo(textWriter);
-                    JsSyntaxToken.Space.WriteTo(textWriter);
+                    textWriter.WriteJsSyntax(JsSyntaxToken.Comma, JsSyntaxToken.Space);
                 }
-                ArgumentNames[i].WriteTo(textWriter);
+                textWriter.WriteJsSyntax(ArgumentNames[i]);
             }
-            JsSyntaxToken.CloseParen.WriteTo(textWriter);
-            JsSyntaxToken.NewLine.WriteTo(textWriter);
-            Body.WriteTo(textWriter);
+
+            textWriter.WriteJsSyntax(JsSyntaxToken.CloseParen, JsSyntaxToken.NewLine);
+            _ = null != Body ? textWriter.WriteJsSyntax(Body) : textWriter.WriteJsSyntax(JsSyntaxToken.OpenBrace, JsSyntaxToken.CloseBrace);
         }
     }
 }

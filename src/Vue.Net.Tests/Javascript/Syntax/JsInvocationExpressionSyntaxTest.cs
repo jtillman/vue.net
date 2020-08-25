@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Vue.Net.Tests.Javascript.Syntax
 {
-    public class JsInvocationExpressionSyntaxTest : BaseJsSyntaxTest
+    public class JsInvocationExpressionSyntaxTest
     {
         [Fact]
         public void TestConstructorSetsProperties()
@@ -14,10 +14,10 @@ namespace Vue.Net.Tests.Javascript.Syntax
             var expression = new JsIdentifierNameSyntax(JsSyntaxToken.Identifier("method"));
             var arguments = new JsExpressionSyntax[0];
 
-            var syntax = new JsInvocationExpressionSyntax(expression, arguments);
+            var syntax = new JsInvocationExpressionSyntax(expression, new JsArgumentListSyntax(arguments));
 
             Assert.Equal(expression, syntax.Expression);
-            Assert.Equal(arguments, syntax.Arguments);
+            Assert.Equal(arguments, syntax.Arguments.Arguments.Items);
         }
 
         [Fact]
@@ -26,9 +26,9 @@ namespace Vue.Net.Tests.Javascript.Syntax
             var expression = new JsIdentifierNameSyntax(JsSyntaxToken.Identifier("method"));
             var arguments = new JsExpressionSyntax[0];
 
-            var syntax = new JsInvocationExpressionSyntax(expression, arguments);
+            var syntax = new JsInvocationExpressionSyntax(expression, new JsArgumentListSyntax(arguments));
 
-            AssertWrites("method()", syntax);
+            syntax.AssertWrites("method()");
         }
 
         [Fact]
@@ -39,9 +39,9 @@ namespace Vue.Net.Tests.Javascript.Syntax
                 new JsIdentifierNameSyntax(JsSyntaxToken.Identifier("arg1"))
             };
 
-            var syntax = new JsInvocationExpressionSyntax(expression, arguments);
+            var syntax = new JsInvocationExpressionSyntax(expression, new JsArgumentListSyntax( arguments));
 
-            AssertWrites("method(arg1)", syntax);
+            syntax.AssertWrites("method(arg1)");
         }
 
         [Fact]
@@ -54,9 +54,9 @@ namespace Vue.Net.Tests.Javascript.Syntax
                 new JsIdentifierNameSyntax(JsSyntaxToken.Identifier("arg3"))
             };
 
-            var syntax = new JsInvocationExpressionSyntax(expression, arguments);
+            var syntax = new JsInvocationExpressionSyntax(expression, new JsArgumentListSyntax(arguments));
 
-            AssertWrites("method(arg1, arg2, arg3)", syntax);
+            syntax.AssertWrites("method(arg1, arg2, arg3)");
         }
     }
 }

@@ -13,8 +13,7 @@ namespace Vue.Net.Javascript.Syntax
 
         public override void WriteTo(TextWriter textWriter)
         {
-            Expression.WriteTo(textWriter);
-            JsSyntaxToken.Semicolon.WriteTo(textWriter);
+            textWriter.WriteJsSyntax(Expression, JsSyntaxToken.Semicolon, JsSyntaxToken.NewLine);
         }
     }
 }

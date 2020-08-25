@@ -2,6 +2,7 @@
 
 namespace Vue.Net.Javascript.Syntax
 {
+
     public sealed class JsObjectCreationExpressionSyntax : JsExpressionSyntax
     {
         public JsBaseObjectPropertySyntax[] Properties { get; }

@@ -30,7 +30,10 @@ namespace Vue.Net.Javascript
                         case IndexerDeclarationSyntax indexerDeclaration:
                         case StructDeclarationSyntax structDeclaration:
                         case EnumDeclarationSyntax enumDeclaration:
-                            return new JsBaseObjectPropertySyntax[0];
+                            return Array.Empty<JsBaseObjectPropertySyntax>();
+                        case ConstructorDeclarationSyntax constructorDeclaration:
+                            Console.WriteLine("FIXME: Can't convert constructors");
+                            return Array.Empty<JsBaseObjectPropertySyntax>();
                         default:
                             throw new NotSupportedException($"Member {member} is not supported");
                     }
@@ -65,7 +68,7 @@ namespace Vue.Net.Javascript
                 case SyntaxKind.GetAccessorDeclaration:
                     return new JsMethodPropertySyntax(
                         identifier,
-                        new JsSyntaxToken[0],
+                        Array.Empty<JsSyntaxToken>(),
                         ToJsBlock(accessor.Body),
                         new[] { JsSyntaxToken.Get });
                 case SyntaxKind.SetAccessorDeclaration:
@@ -120,7 +123,7 @@ namespace Vue.Net.Javascript
                     switch (propertySyntax.Type)
                     {
                         case ArrayTypeSyntax arraySyntax:
-                            value = new JsArrayCreationExpressionSyntax(new JsExpressionSyntax[0]);
+                            value = new JsArrayCreationExpressionSyntax(Array.Empty<JsExpressionSyntax>());
                             break;
                         case PredefinedTypeSyntax predefinedSyntax:
                             value = ToDefaultValueJsExpression(predefinedSyntax);
@@ -190,7 +193,7 @@ namespace Vue.Net.Javascript
         public JsIdentifierNameSyntax[] ToJsIdentifierNames(ParameterListSyntax parameters)
         {
             if (null == parameters)
-                return new JsIdentifierNameSyntax[0];
+                return Array.Empty<JsIdentifierNameSyntax>();
             return parameters.Parameters.Select(p => new JsIdentifierNameSyntax(ToJsToken(p.Identifier))).ToArray();
         }
 
@@ -211,7 +214,7 @@ namespace Vue.Net.Javascript
         public JsArrowFunctionExpressionSyntax ToJsArrowFunctionExpression(SimpleLambdaExpressionSyntax syntax)
         {
             return new JsArrowFunctionExpressionSyntax(
-                new JsIdentifierNameSyntax[0],
+                Array.Empty<JsIdentifierNameSyntax>(),
                 ToJs(syntax.Body));
         }
 
@@ -236,6 +239,7 @@ namespace Vue.Net.Javascript
         public JsAssignmentExpressionSyntax ToJsAssignmentExpression(AssignmentExpressionSyntax syntax)
         {
             return new JsAssignmentExpressionSyntax(
+                JsSyntaxToken.Identifier(syntax.OperatorToken.ValueText),
                 ToJsExpression(syntax.Left),
                 ToJsExpression(syntax.Right));
         }
@@ -285,6 +289,16 @@ namespace Vue.Net.Javascript
             return syntax.Expressions.Select(expression => ToJsExpression(expression)).ToArray();
         }
 
+        public JsExpressionSyntax ToJsExpression(ThisExpressionSyntax syntax)
+        {
+            return new JsLiteralExpressionSyntax(JsSyntaxToken.This);
+        }
+
+        public JsParenthesizedExpressionSyntax ToJsParenthesizedExpression(ParenthesizedExpressionSyntax syntax)
+        {
+            return new JsParenthesizedExpressionSyntax(ToJsExpression(syntax.Expression));
+        }
+
         public JsExpressionSyntax ToJsExpression(ExpressionSyntax syntax)
         {
             switch (syntax)
@@ -314,7 +328,7 @@ namespace Vue.Net.Javascript
                 case InvocationExpressionSyntax invocationSyntax:
                     return new JsInvocationExpressionSyntax(
                         ToJsExpression(invocationSyntax.Expression),
-                        invocationSyntax.ArgumentList.Arguments.Select(arg => ToJsExpression(arg.Expression)).ToArray());
+                        new JsArgumentListSyntax(invocationSyntax.ArgumentList.Arguments.Select(arg => ToJsExpression(arg.Expression)).ToArray()));
                 case MemberAccessExpressionSyntax memberSyntax:
                     return new JsMemberAccessorExpressionSyntax(
                         ToJsExpression(memberSyntax.Expression),
@@ -323,6 +337,10 @@ namespace Vue.Net.Javascript
                     return new JsIdentifierNameSyntax(ToJsToken(predefinedSyntax));
                 case StackAllocArrayCreationExpressionSyntax stackAllocArrayCreationSyntax:
                     return ToJsArrayCreationExpression(stackAllocArrayCreationSyntax);
+                case ThisExpressionSyntax thisExpressionSyntax:
+                    return ToJsExpression(thisExpressionSyntax);
+                case ParenthesizedExpressionSyntax parenthesizedExpressionSyntax:
+                    return ToJsParenthesizedExpression(parenthesizedExpressionSyntax);
                 case CheckedExpressionSyntax checkedSyntax:
                 case ConditionalAccessExpressionSyntax conditionalAccessSyntax:
                 case ConditionalExpressionSyntax conditionalSyntax:
@@ -355,7 +373,7 @@ namespace Vue.Net.Javascript
             }
         }
 
-        public JsSyntaxToken ToJsToken(SyntaxToken token)
+        public static JsSyntaxToken ToJsToken(SyntaxToken token)
         {
             var kind = token.Kind();
             switch (kind)
@@ -368,6 +386,22 @@ namespace Vue.Net.Javascript
                     return JsSyntaxToken.StringLiteral(token.ValueText);
                 case SyntaxKind.NumericLiteralToken:
                     return JsSyntaxToken.NumberLiteral(token.ValueText);
+                case SyntaxKind.EqualsEqualsToken:
+                    return JsSyntaxToken.EqualsEquals;
+                case SyntaxKind.AmpersandAmpersandToken:
+                    return JsSyntaxToken.AmpersandAmpersand;
+                case SyntaxKind.ExclamationEqualsToken:
+                    return JsSyntaxToken.ExclamationEquals;
+                case SyntaxKind.BarBarToken:
+                    return JsSyntaxToken.BarBar;
+                case SyntaxKind.LessThanEqualsToken:
+                    return JsSyntaxToken.LessThanEqual;
+                case SyntaxKind.GreaterThanEqualsToken:
+                    return JsSyntaxToken.GreaterThanEqual;
+                case SyntaxKind.GreaterThanToken:
+                    return JsSyntaxToken.GreaterThan;
+                case SyntaxKind.LessThanToken:
+                    return JsSyntaxToken.LessThan;
                 default:
                     throw new JsTranspilationException<SyntaxToken, JsSyntaxToken>(token);
             }

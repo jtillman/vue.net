@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Vue.Net.Tests.Javascript.Syntax
 {
-    public class JsExpressionStatementSyntaxTest : BaseJsSyntaxTest
+    public class JsExpressionStatementSyntaxTest
     {
         [Fact]
         public void TestConstructorSetsExpressionProperty()
@@ -22,7 +22,7 @@ namespace Vue.Net.Tests.Javascript.Syntax
 
             var syntax = new JsExpressionStatementSyntax(expression);
 
-            AssertWrites("expression;", syntax);
+            syntax.AssertWrites("expression;");
         }
     }
 }

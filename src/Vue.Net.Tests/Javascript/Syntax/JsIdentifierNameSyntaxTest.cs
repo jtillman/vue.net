@@ -5,7 +5,7 @@ using Xunit;
 namespace Vue.Net.Tests.Javascript.Syntax
 {
 
-    public class JsIdentifierNameSyntaxTest : BaseJsSyntaxTest
+    public class JsIdentifierNameSyntaxTest
     {
         [Fact]
         public void TestConstructorThrowsOnNullName()
@@ -29,7 +29,7 @@ namespace Vue.Net.Tests.Javascript.Syntax
             var token = JsSyntaxToken.Identifier(name);
             var syntax = new JsIdentifierNameSyntax(token);
 
-            AssertWrites(name, syntax);
+            syntax.AssertWrites(name);
         }
     }
 }

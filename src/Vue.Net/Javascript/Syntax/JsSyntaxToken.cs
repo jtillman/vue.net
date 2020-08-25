@@ -1,10 +1,55 @@
-﻿using System.IO;
+﻿using Microsoft.CodeAnalysis.CSharp;
+using System;
+using System.IO;
 using System.Web;
 
 namespace Vue.Net.Javascript.Syntax
 {
     public class JsSyntaxToken : JsSyntax
     {
+        public SyntaxKind GetCSharpSyntaxKind()
+        {
+            return this.Value switch
+            {
+                "get" => SyntaxKind.GetKeyword,
+                "set" => SyntaxKind.SetKeyword,
+                "if" => SyntaxKind.IfKeyword,
+                "else" => SyntaxKind.ElseKeyword,
+                "\r\n" => SyntaxKind.EndOfLineTrivia,
+                "null" => SyntaxKind.NullKeyword,
+                "(" => SyntaxKind.OpenParenToken,
+                ")" => SyntaxKind.CloseParenToken,
+                "[" => SyntaxKind.OpenBracketToken,
+                "]" => SyntaxKind.CloseBracketToken,
+                "{" => SyntaxKind.OpenBraceToken,
+                "}" => SyntaxKind.CloseBraceToken,
+                "," => SyntaxKind.CommaToken,
+                ":" => SyntaxKind.ColonToken,
+                ";" => SyntaxKind.SemicolonToken,
+                " " => SyntaxKind.WhitespaceTrivia,
+                "throw" => SyntaxKind.ThrowKeyword,
+                "async" => SyntaxKind.AsyncKeyword,
+                "await" => SyntaxKind.AwaitKeyword,
+                "new" => SyntaxKind.NewKeyword,
+                "return" => SyntaxKind.ReturnKeyword,
+                "." => SyntaxKind.DotToken,
+                "this" => SyntaxKind.ThisKeyword,
+                "var" => SyntaxKind.VarKeyword,
+                "let" => SyntaxKind.LetKeyword,
+                "=>" => SyntaxKind.EqualsGreaterThanToken,
+                "=" => SyntaxKind.EqualsToken,
+                "==" => SyntaxKind.EqualsEqualsToken,
+                "&&" => SyntaxKind.AmpersandAmpersandToken,
+                "!=" => SyntaxKind.ExclamationEqualsToken,
+                "||" => SyntaxKind.BarBarToken,
+                "<=" => SyntaxKind.LessThanEqualsToken,
+                ">=" => SyntaxKind.GreaterThanEqualsToken,
+                ">" => SyntaxKind.GreaterThanToken,
+                "<" => SyntaxKind.LessThanToken,
+                _ => throw new ArgumentException($"Unknown CSharp Syntax for Token '{Value}'")
+            };
+        }
+
         public object Value { get; }
         public string ValueText { get; }
 
@@ -83,8 +128,20 @@ namespace Vue.Net.Javascript.Syntax
         public static JsSyntaxToken Dot =>
             new JsSyntaxToken(".", ".");
 
+        public static JsSyntaxToken This =>
+            new JsSyntaxToken("this", "this");
+
+        public static JsSyntaxToken Class =>
+            new JsSyntaxToken("class", "class");
+
+        public static JsSyntaxToken GlobalThis =>
+            new JsSyntaxToken("globalThis", "globalThis");
+
         public static JsSyntaxToken Var =>
             new JsSyntaxToken("var", "var");
+
+        public static JsSyntaxToken ValueParamterName =>
+            new JsSyntaxToken("value", "value");
 
         public static JsSyntaxToken Let =>
             new JsSyntaxToken("let", "let");
@@ -94,6 +151,30 @@ namespace Vue.Net.Javascript.Syntax
 
         public static JsSyntaxToken EqualSign =>
             new JsSyntaxToken("=", "=");
+
+        public static JsSyntaxToken EqualsEquals =>
+            new JsSyntaxToken("==", "==");
+
+        public static JsSyntaxToken AmpersandAmpersand =>
+            new JsSyntaxToken("&&", "&&");
+
+        public static JsSyntaxToken ExclamationEquals =>
+            new JsSyntaxToken("!=", "!=");
+
+        public static JsSyntaxToken BarBar =>
+            new JsSyntaxToken("||", "||");
+
+        public static JsSyntaxToken LessThanEqual =>
+            new JsSyntaxToken("<=", "<=");
+
+        public static JsSyntaxToken GreaterThanEqual =>
+            new JsSyntaxToken(">=", ">=");
+
+        public static JsSyntaxToken GreaterThan =>
+            new JsSyntaxToken(">", ">");
+
+        public static JsSyntaxToken LessThan =>
+            new JsSyntaxToken("<", "<");
 
         public static JsSyntaxToken NumberLiteral(int value) => new JsSyntaxToken(value, value.ToString());
 

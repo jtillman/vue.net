@@ -33,11 +33,7 @@ namespace Vue.Net.Javascript.Syntax
 
         public override void WriteTo(TextWriter textWriter)
         {
-            Left.WriteTo(textWriter);
-            JsSyntaxToken.Space.WriteTo(textWriter);
-            OperatorToken.WriteTo(textWriter);
-            JsSyntaxToken.Space.WriteTo(textWriter);
-            Right.WriteTo(textWriter);
+            textWriter.WriteJsSyntax(Left, JsSyntaxToken.Space, OperatorToken, JsSyntaxToken.Space, Right);
         }
     }
 }

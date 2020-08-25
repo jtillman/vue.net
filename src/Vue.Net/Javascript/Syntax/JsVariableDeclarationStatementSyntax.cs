@@ -18,19 +18,13 @@ namespace Vue.Net.Javascript.Syntax
 
         public override void WriteTo(TextWriter textWriter)
         {
-            JsSyntaxToken.Var.WriteTo(textWriter);
-            JsSyntaxToken.Space.WriteTo(textWriter);
-            Name.WriteTo(textWriter);
+            textWriter.WriteJsSyntax(JsSyntaxToken.Var, JsSyntaxToken.Space, Name);
 
             if (null != Initializer)
             {
-                JsSyntaxToken.Space.WriteTo(textWriter);
-                JsSyntaxToken.EqualSign.WriteTo(textWriter);
-                JsSyntaxToken.Space.WriteTo(textWriter);
-
-                Initializer.WriteTo(textWriter);
+                textWriter.WriteJsSyntax(JsSyntaxToken.Space, Initializer);
             }
-            JsSyntaxToken.Semicolon.WriteTo(textWriter);
+            textWriter.WriteJsSyntax(JsSyntaxToken.Semicolon, JsSyntaxToken.NewLine);
         }
     }
 }
